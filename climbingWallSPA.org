@@ -43,11 +43,23 @@ ul { list-decoration: none}
 <!-- vue -->
 <div id="route_specification">
 <ul class="color-buttons">
-  <li v-for="c in colors" v-bind:style="{ background: c}" v-on:click="selectColor" v-bind:title="c" >  </li>
+  <li v-for="c in options.color" v-bind:style="{ background: c}" @click="current.color = c" v-bind:title="c" >  </li>
 </ul>
 <ul class="grade-select">
- <li v-for="g in grades"><input type="radio" name="grade" value={{g}} /><br> {{g}} </li>
+ <li v-for="g in options.grade"><input type="radio" name="grade" :value="g" v-model="current.grade_full" /><br/> {{g}} </li>
+ <li><input type="checkbox" name="plus_half" v-model="current.plus_half" /> <br /> +1/2?</li>
 </ul>
+
+
+
+<div id="climbingAreas"> </div>
+
+<div id="current">
+ grade: {{grade_combined()}} <br/>
+ color: {{current.color}} <br/>
+ area : {{current.area}} <br/>
+</div>
+
 </div>
 
 <!-- d3 select area -->
@@ -56,13 +68,49 @@ ul { list-decoration: none}
 </html>
  #+END_SRC
  
+** model-view
+*** model
+    what do we want to track, what color,grade,and status options are allowed
+ #+BEGIN_SRC javascript :tangle climbarea.js :exports code
+ var model = 
+  {'current': 
+    {'color': null, 'grade': null, 
+     'area': null,
+     'name': null, 'status': null, 'rate': null,
+     'note': null
+    },
+   'options': {
+     'status': ['on-sight','completed','peiced','75%','50%','25%','started','skipped'],
+     'color':  ['blue','orange','red','pink','black','yellow','white','strip','rainbow'],
+     'grade':  ['B',0,1,2,3,4,5,6,7,8] 
+   }
+  }
+ 
+ #+END_SRC
+
+*** setup
+   color selection is built with vue
+#+BEGIN_SRC javascript :tangle climbarea.js :exports code
+var color= new Vue({
+ el:"#route_specification",
+ data: model, 
+ methods: {
+   grade_combined: function(){
+     return (this.current.grade_full == 'B' ? -1 : this.current.grade_full) + (this.current.plus_half ? .5 : 0) 
+   }
+  }
+})
+
+#+END_SRC
+ 
 ** selecting areas
    We want to click an area. This depends on the svg floor plan loaded later.
  #+BEGIN_SRC javascript :tangle climbarea.js :exports code
  // setup
-var svgdiv = d3.select("body").append("div");
-svgdiv.attr("id","climbingAreas")
-//svgdiv.style("width", 400)
+//var svgdiv = d3.select("body").append("div");
+//svgdiv.attr("id","climbingAreas")
+var svgdiv = d3.select("div#climbingAreas");
+
 
 var svg;
 var clickable;
@@ -78,6 +126,7 @@ function select_area() {
  area = d3.select(this)
  area.style('fill','red')
  name = area.attr('id').match(/area_(.*)/)[1]
+ model.current.area = name
  console.log(name)
 }
 
@@ -98,6 +147,10 @@ d3.xml("outline.svg", function(error, documentFragment) {
 
         svg = svgdiv.select("svg")
 
+        // shrink 
+        svg.attr("width", "400")
+        svg.attr("height", "150")
+
         allpaths = svg.selectAll('path,rect')
 
         clickable = allpaths.filter(function() {
@@ -112,17 +165,3 @@ d3.xml("outline.svg", function(error, documentFragment) {
         })
     });
  #+END_SRC
-
-** color and difficulty
-   color selection is built with vue
-#+BEGIN_SRC javascript :tangle climbarea.js :exports code
-var color= new Vue({
- el:"#route_specification",
- data: { colors: ['blue','orange','red','pink','black','yellow','white','strip','rainbow'],
-        grades: ['B',0,1,2,3,4,5,6,7,8] },
- methods: {
-   selectColor: function() {console.log(this)}
- }
-})
-
-#+END_SRC
