@@ -1,0 +1,77 @@
+<html>
+<head>
+<title> TCW Route Tracker </title>
+<script src="https://unpkg.com/vue"></script>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<link rel="stylesheet" href="style.css"> </style>
+</head>
+<body> 
+<!-- vue -->
+<div id="climbing_spa">
+  <div id="route_specification">
+
+  <!-- to submit: route status and specific info --> 
+    <div id="current" v-show="current.area && current.color && current.grade_full">
+
+     <span class="route_id"> 
+      {{current.color}} {{grade_combined()}} on {{current.area}} 
+     </span>
+     <br />
+     <input type="text" placeholder="setter" v-model="current.setter" size=3 />
+     <input type="text" placeholder="name" v-model="current.name" />
+     <br />
+
+     <select v-model="current.status" >
+      <option value="" disabled selected>status</option>
+      <option v-for="s in options.status" >{{s}}</option>
+     </select>
+
+     <select v-model="current.rate" >
+      <option value="" disabled selected>rate</option>
+      <option v-for="r in options.ratings">{{r}}</option>
+     </select>
+
+     <input type="text" placeholder="notes" v-model="current.note" />
+
+
+     </br>
+     <button v-on:click="addCurrent()">Add</button>
+    </div>
+
+   <!-- 3 piece identification --> 
+   <ul class="color-buttons">
+     <li v-for="c in options.color" v-bind:class="{'box-selected': c == current.color }" v-bind:style="{ background: c}" @click="current.color = c" v-bind:title="c" >
+     </li>
+   </ul>
+   <ul class="grade-select">
+    <li v-for="g in options.grade">
+      <input type="radio" name="grade" :value="g" v-model="current.grade_full" /><br/>
+     {{g}} 
+      </li>
+    <li><input type="checkbox" name="plus_half" v-model="current.plus_half" /> <br /> +1/2?</li>
+   </ul>
+  
+  <div id="climbingAreas"> </div>
+  
+  </div>
+
+  <div id="list">
+   <ul class="route_list"> 
+     <li v-for="r in allroutes"> 
+       <span v-on:click="setCurrent(r.color,r.grade,r.area)" class="info">
+        {{r.area}} {{r.color}} {{r.grade}} 
+       </span> 
+       <span class="person"> 
+        {{r.climber}} {{r.status}} @ {{r.timestamp}}
+       </span>
+    </li>
+   </ul>
+  </div>
+</div>
+
+
+
+<!-- d3 select area -->
+<script src="climbarea.js"> </script>
+</body>
+</html>

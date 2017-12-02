@@ -1,0 +1,51 @@
+/* ul/li setting for color buttons is the only real meaningful css setting 
+ * all other elements will display in a functioning way with css */
+ul { list-decoration: none}
+.grade-select >li { display: inline-block; text-align:center}
+.color-buttons>li { 
+  display: inline-block;
+  width: 20px;
+  height:20px;
+  margin-right: 10;
+  border: solid black 2px;
+  cursor: pointer; }
+.box-selected {
+  border-color: red !important;
+}
+
+/* left side */
+#route_specification {
+ display: inline-block;
+ width: 400px;
+}
+
+#current > span.route_id {
+ display: block;
+}
+
+/* right side */
+#list {
+  display: inline-block;
+  vertical-align: top
+}
+/* display submited route statuses */
+ul.route_list > li {
+ padding: .2em
+}
+ul.route_list > li > span.info {
+ background-color: lightblue;
+ margin-right: 1em;
+ cursor: pointer;
+ margin-bottom: solid darkblue 1px;
+ border-bottom: dashed black 1px;
+}
+ul.route_list > li > span.info:hover, ul.route_list > li > span.info:active {
+ background-color: lightgreen
+}
+ul.route_list > li > span.person {
+  font-size: 6pt;
+  background-color: gray;
+  border-radius: 5px;
+  border: solid black 1px;
+  padding: .2em;
+}
