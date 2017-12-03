@@ -1,24 +1,35 @@
 <html>
 <head>
 <title> TCW Route Tracker </title>
-<script src="https://unpkg.com/vue"></script>
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<!--
+ <script src="https://unpkg.com/vue"></script>
+ <script src="https://d3js.org/d3.v4.min.js"></script>
+-->
+<script src="vue"></script>
+<script src="d3.v4.min.js"></script>
 <link rel="stylesheet" href="style.css"> </style>
 </head>
 <body> 
 <!-- vue -->
 <div id="climbing_spa">
+  <div id="who-are-we">
+  logging as {{current.climber}} <span class="clickable" v-on:click="setClimber(null)">change</span>
+  </div>
   <div id="route_specification">
 
   <!-- to submit: route status and specific info --> 
-    <div id="current" v-show="current.area && current.color && current.grade_full">
+    <span v-on:click="reset_current()" class="clickable" v-show="have_any_current"> x </span>
+    <!--  debug v-if displays
+    all: {{have_all_current}} <br>
+    any: {{have_any_current}} <br>
+    {{current.area  != null }} {{current.color != null }} {{current_grade != null}}
+    <br> current_grade: {{ current_grade }} | {{current.grade_full}} + {{current.plus_half}}
+     -->
 
+    <div id="current" v-show="have_all_current">
      <span class="route_id"> 
       {{current.color}} {{grade_combined()}} on {{current.area}} 
      </span>
-     <br />
-     <input type="text" placeholder="setter" v-model="current.setter" size=3 />
-     <input type="text" placeholder="name" v-model="current.name" />
      <br />
 
      <select v-model="current.status" >
@@ -32,17 +43,40 @@
      </select>
 
      <input type="text" placeholder="notes" v-model="current.note" />
+     <br />
+     <input type="text" placeholder="setter" v-model="current.setter" size=3 />
+     <input type="text" placeholder="name" v-model="current.name" />
 
 
      </br>
-     <button v-on:click="addCurrent()">Add</button>
+     <button v-on:click="addCurrent()" v-show="current.status">Add</button>
     </div>
 
    <!-- 3 piece identification --> 
+
+   <div id="id-current">
+    <select v-model="current.color" >
+        <option value="" disabled selected>color</option>
+        <option v-for="g in options.color" v-bind:style="{color: g}">{{g}}</option>
+    </select>
+
+    <select v-model="current.grade_full" >
+        <option value="" disabled selected>grade</option>
+        <option v-for="g in options.grade">{{g}}</option>
+    </select>
+
+    <input type="checkbox" name="plus_half" v-model="current.plus_half" /> +1/2?
+   </div>
+   
+
+   <!-- "fancier" select
+     -- select grade as as radio buttons
+
    <ul class="color-buttons">
      <li v-for="c in options.color" v-bind:class="{'box-selected': c == current.color }" v-bind:style="{ background: c}" @click="current.color = c" v-bind:title="c" >
      </li>
    </ul>
+
    <ul class="grade-select">
     <li v-for="g in options.grade">
       <input type="radio" name="grade" :value="g" v-model="current.grade_full" /><br/>
@@ -50,22 +84,43 @@
       </li>
     <li><input type="checkbox" name="plus_half" v-model="current.plus_half" /> <br /> +1/2?</li>
    </ul>
+   -->
   
   <div id="climbingAreas"> </div>
   
   </div>
 
   <div id="list">
+
+   <!--  summary list -->
    <ul class="route_list"> 
-     <li v-for="r in allroutes"> 
-       <span v-on:click="setCurrent(r.color,r.grade,r.area)" class="info">
+     <li v-for="r in route_summaries"  v-if="matches_current(r)"> 
+       <span v-on:click="setCurrent(r)" class="info">
         {{r.area}} {{r.color}} {{r.grade}} 
        </span> 
+       <br />
+       <span class="info_minor">
+        {{r.name}} {{r.setter}} {{r.set_date}}
+       </span>
+       <span class="stats"> 
+        | {{r.cnt}} {{r.avgrank}} ( {{r.recent}} )
+       </span>
+    </li>
+   </ul>
+
+   <hr v-show="allroutes.length > 0">
+   <!--  raw list -->
+   <ul class="route_list"> 
+     <li v-for="r in allroutes"> 
+       <span v-on:click="setCurrent(r)" class="info">
+        {{r.area}} {{r.color}} {{r.grade}} 
+       </span>  <br>
        <span class="person"> 
         {{r.climber}} {{r.status}} @ {{r.timestamp}}
        </span>
     </li>
    </ul>
+
   </div>
 </div>
 

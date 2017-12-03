@@ -1,69 +1,143 @@
 var empty_route_info = {
- 'color': null, 'grade': null, 
  'area': null,
  'set_date': null,
  'setter': null,
  'name': null,
  //status and rate are dropdowns
  // must be "" instead of null so dropbox selects it
+ 'grade_full': "", 
  'status': "", 
  'rate': "",
+ 'color': "", 
  'note': null,
  'location': 'TCW_boulder',
- 'climber': 'WF'
+ 'climber': null
 }
 var model = 
  {'current': JSON.parse(JSON.stringify(empty_route_info)),
   'options': {
     'status': ['on-sight','completed','peiced','75%','50%','25%','started','skipped'],
-    'color':  ['blue','orange','red','pink','black','yellow','white','strip','rainbow'],
+    'color':  ['blue','orange','red','pink','black','yellow','white','stripped','rainbow','graphic'],
     'grade':  ['B',0,1,2,3,4,5,6,7,8],
     'ratings': [1,2,3,4,5]
   },
-  'allroutes': []
+  // left side lists of routes
+  'allroutes': [],
+  'route_summaries': [],
  }
 
-sendaway = function(data) {
+function sendaway(data) {
      //console.log('sending',data)
      var x = new XMLHttpRequest()
      x.open('POST','/add',true)
      x.setRequestHeader("Content-type","application/json")
      x.send(data)
 }
-getRouteList = function(location,onready){
+function ajax_update(path,onready){
      var x = new XMLHttpRequest()
      x.onreadystatechange = function() {
        if (this.readyState == 4 && this.status == 200){
            onready(JSON.parse(x.response))
        }
      }
-     x.open('GET','/list/'+location,true)
+     x.open('GET',path,true)
      //x.setRequestHeader("Content-type","application/json") // overrideMimeType
      x.send()
+}
+// format a date field in a list of hashes/dicts
+// from python datetime
+function frmt_date(a,field) {
+    for(var i=0; i < a.length; i++){
+      if( ! a[i][field] ) { continue }
+      var d = new Date(a[i][field] * 1000)
+      a[i][field] = d.toISOString().substr(0,16).replace('T',' ')
+    }
+    return(a)
+}
+
+function isempty(x){ return( x === "" || x == null || x == undefined) }
+// for filtering. return true when not set, or when matches
+function null_or_match(x,m) {
+  if( x !== 0 && isempty(x) ) {
+   return(true)
+  }
+  return(x == m) 
 }
 
 var vueControler = new Vue({
  el:"#climbing_spa",
  data: model, 
- methods: {
-   grade_combined: function(){
-     return (this.current.grade_full == 'B' ? -1 : this.current.grade_full) + (this.current.plus_half ? .5 : 0) 
+ computed: {
+   //current_grade: this.grade_combined
+   current_grade: function(){
+     grade = this.current.grade_full == 'B' ? -1 : parseInt(this.current.grade_full)
+     //console.log('current_grade computed:',this.current.grade_full,grade,isNaN(grade))
+     if(isNaN(grade)){ return(null) }
+     return (grade + (this.current.plus_half ? .5 : 0) )
    },
-   setCurrent: function(color,grade,area){
-    console.log(color,grade,area)
-    this.current.color = color
-    this.current.area = area
-    area_id = '#area_' + area
+   have_any_current: function() {
+      return(!isempty(this.current.area)  ||
+             !isempty(this.current.color) || 
+             !isempty(this.current_grade) )
+   },
+   have_all_current: function() {
+      return(!isempty(this.current.area)  &&
+             !isempty(this.current.color) && 
+             !isempty(this.current_grade) )
+   }
+
+ },
+ methods: {
+   setClimber: function(climber){
+      if(climber === null ){
+          climber =  prompt('Who are you?')
+      }
+      empty_route_info['climber'] = climber
+      this.current.climber = empty_route_info['climber']
+      // set cookie
+      document.cookie = "max-age=31536000"
+      document.cookie = "climber="+ climber
+   },
+   matches_current: function(r){
+
+     //console.log('match current? r:',JSON.stringify(r),' current:',JSON.stringify(this.current))
+     return( null_or_match(this.current.color,r.color) &&
+             null_or_match(this.current_grade,r.grade) &&
+             null_or_match(this.current.area, r.area) )
+ 
+   },
+   grade_combined: function(){
+     return(this.current_grade)
+   },
+   setCurrent: function(r){
+    console.log('setCurrent',JSON.stringify(r))
+    this.current.color = r.color
+    this.current.area = r.area
+    this.current.name = r.name
+    this.current.setter =  r.setter
+    area_id = '#area_' + r.area
     // this calls to var and function created later by d3
     svgdiv.select(area_id).each(select_area)
     
     // grade_full is without the .5, and B if -1
-    if(grade == "-1"){
+    newgrade = parseFloat(r.grade)
+    if(isNaN(newgrade)){newgrade = 0}
+    //console.log('setCurrent grade from->to:',this.current.grade_full, r.grade, newgrade)
+    if( newgrade < 0 ){
       this.current.grade_full == "B"
     }else {   
-      this.current.grade_full = Math.floor(grade)
+      this.current.grade_full = Math.floor(newgrade)
     }
-    this.current.plus_half = grade != Math.floor(grade)
+
+    // update half point checkbox
+    newplushalf=(newgrade != Math.floor(newgrade))
+    //console.log('setCurrent half old,new: ',this.current.plus_half, newplushalf)
+    this.current.plus_half = newplushalf
+    
+    // research all logs of this 
+    listURL = ['list', this.current.location, this.current.area,this.current.color, this.current_grade].join('/')
+    ajax_update('/' + listURL, this.fetchAllstatuses)
+    console.log('updated allroutes', this.allroutes)
    },
    addCurrent: function(){
      this.current.grade = this.grade_combined()
@@ -81,22 +155,37 @@ var vueControler = new Vue({
      reset_color()
    },
    updateList: function() {
-     getRouteList(this.current.location, this.updateListWithData)
+     console.log('update summary')
+     // all routes
+     ajax_update('/summary/'+this.current.location, this.fetchClimbSummaries)
+
+     // all statuses
+     // ajax_update('/list/'+this.current.location, this.fetchAllstatuses)
    },
-   updateListWithData: function(d){
+   /* get data from api server */
+   fetchAllstatuses: function(d){
     var self = this
     console.log(d)
-    self.allroutes = d 
+    self.allroutes = frmt_date(d,'timestamp')
+   },
+   fetchClimbSummaries: function(d){
+    var self = this
+    console.log(d)
     // clean up: unixtimestamp to iso date
-    for(var i=0;i<this.allroutes.length; i++){
-      if( ! self.allroutes[i]['timestamp'] ) { continue }
-      var d = new Date(self.allroutes[i]['timestamp'] * 1000)
-      self.allroutes[i]['timestamp'] = d.toISOString()
-    }
-   }
-  },
+    self.route_summaries = frmt_date(d,'recent')
+   },
+
+ },
  mounted: function(){
+     //console.log('mounting')
      this.updateList()
+     // use cookie or prompt for climber(user)
+     // should match climber=MY_CLIMBING_ID
+     console.log('setting cookie')
+     m=decodeURIComponent(document.cookie).match('climber=([^;]+)')
+     climber=m?m[1]:null
+     this.setClimber(climber)
+     console.log('climber = ',this.current.climber,'; should be:', climber)
  }
 })
 

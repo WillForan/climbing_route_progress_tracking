@@ -1,6 +1,12 @@
+.clickable { cursor: pointer;  }
+#current { border: solid black 1px; padding: 5px;}
+#id-current {padding: 1em}
 /* ul/li setting for color buttons is the only real meaningful css setting 
  * all other elements will display in a functioning way with css */
-ul { list-decoration: none}
+ul { 
+ list-style: none;
+}
+
 .grade-select >li { display: inline-block; text-align:center}
 .color-buttons>li { 
   display: inline-block;
@@ -30,7 +36,8 @@ ul { list-decoration: none}
 }
 /* display submited route statuses */
 ul.route_list > li {
- padding: .2em
+ padding: .2em;
+ padding-bottom: 1em;
 }
 ul.route_list > li > span.info {
  background-color: lightblue;

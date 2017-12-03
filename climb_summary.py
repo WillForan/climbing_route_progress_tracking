@@ -72,7 +72,7 @@ def try_fill(itera):
 
     # build truth
     truth = []
-    while a_sorted[0]['nfilled'] >= 2:
+    while len(a_sorted) >0 and a_sorted[0]['nfilled'] >= 2:
         truth.append( a_sorted.pop(0) )
     # compare the rest to the truth
     # add together if matches
@@ -87,7 +87,22 @@ def try_fill(itera):
           if nmatches == a['nfilled']:
               truth[ti]['recent'] = max(t['recent'],a['recent'])
               truth[ti]['cnt'] = t['cnt']+a['cnt']
-              truth[ti]['avgrank'] = (t['cnt']*t['avgrank'] + a['cnt']*a['avgrank'])/truth[ti]['cnt']
+
+              # deal with null avgrank
+              cnt=1
+              if t['avgrank']:
+                 tavg = t['cnt']*t['avgrank'] 
+                 cnt = t['cnt']
+              else:
+                 tavg = 0
+              if a['avgrank']:
+                 aavg = a['cnt']*a['avgrank'] 
+                 cnt = cnt + t['cnt']
+              else:
+                 aavg=0
+
+              truth[ti]['avgrank'] = (tavg + aavg)/cnt
+
           else:
               a_keep.append(ai)
       a_sorted = [a_sorted[i] for i in a_keep]
@@ -106,3 +121,16 @@ def fill_idna(d):
         for i, a in g
         for x in try_fill(a) ]
     return(m)
+
+def to_df_fill(r):
+ df = pd.DataFrame(r).\
+      assign(nrate= lambda x: x.rank is not None).\
+      groupby(['location','area','color','grade']).\
+      aggregate(
+       {'timestamp': 'max',
+        'climber': lambda x: x.size,
+        'rate': 'sum',
+        'nrate': 'sum'
+        })
+
+ return(df.T.to_dict().values() )

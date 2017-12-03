@@ -38,13 +38,15 @@ def list(location="TCW_boulder",sortby="cnt"):
 # specific route information
 @route('/list/<location>/<area>/<color>/<grade>')
 @route('/list/<location>/<area>/<color>/<grade>/<sortby>')
-def list(area,color,grade,location="TCW_boulder",sortby="cnt"):
+def list(location,area,color,grade,sortby="cnt"):
     q = Query()
-    r = db.search( (q.location == location) & (q.area == area) & 
-                   (q.grade == grade) & (q.color == color) )
-    s = climb_summary(r,sortby)
+    r = db.search( (q.location == location) & (q.area == area) &
+                   (q.color == color) & (q.grade == float(grade)) )
     response.content_type = 'application/json'
-    return json.dumps(s)
+    #print('looking for loc "%s" area "%s" color "%s" grade "%s"' % (location, area, color, grade) )
+    #print("found %d" % len(r))
+    #s = climb_summary(r,sortby)
+    return json.dumps(r)
 
 
 # all filenames are static
