@@ -72,6 +72,7 @@
      <input type="text" placeholder="notes" v-model="current.note" />
      <br />
      <input type="text" placeholder="setter" v-model="current.setter" size=3 />
+     <input type="text" placeholder="00/00" v-model="current.set_date" size=5 />
      <input type="text" placeholder="name" v-model="current.name" />
 
 
@@ -244,7 +245,7 @@ ul.route_list > li > span.person {
   {'current': JSON.parse(JSON.stringify(empty_route_info)),
    'options': {
      'status': ['on-sight','completed','peiced','75%','50%','25%','started','skipped'],
-     'color':  ['blue','orange','red','pink','black','yellow','white','stripped','rainbow','graphic'],
+     'color':  ['red','orange','yellow','green','blue','pink','black','white','stripped','rainbow','graphic'],
      'grade':  ['B',0,1,2,3,4,5,6,7,8],
      'ratings': [1,2,3,4,5]
    },
@@ -731,20 +732,22 @@ http POST http://localhost:8080/add Content-type:application/json <<<"$data"
  - <2017-11-29 Wed> - python api (bottle+tinydb), ajax submit, list routes
  - <2017-11-30 Thu> - highlight route on list click, reset input on submit
  - <2017-12-01 Fri> - style, "" instead of null for selection, db summery routes
+ - <2017-12-02 Sat> - simpler interface, "user"
+ - <2017-12-05 Tue> - add green to colors, textbox for set_date
 
-*** TODO [#B] fix -1=>"B" on span route list click
-*** TODO [#B] user
-*** TODO [#C] different locations
-*** DONE location summary 
 *** DONE [#A] integrate summary with display
     :LOGBOOK:
     CLOCK: [2017-12-02 Sat 09:15]--[2017-12-02 Sat 09:47] =>  0:32
     :END:
-*** TODO filter summary color/grade/area
+*** TODO [#A] filter summary color/grade/area
     :LOGBOOK:
     CLOCK: [2017-12-02 Sat 10:30]--[2017-12-02 Sat 12:12] =>  1:42
     CLOCK: [2017-12-02 Sat 09:57]--[2017-12-02 Sat 10:25] =>  0:28
     :END:
-**** TODO [#B] setdate
+**** TODO [#B] set_date
+*** TODO [#B] fix -1=>"B" on span route list click
+*** DONE [#B] user
+*** TODO [#C] different locations
+*** DONE location summary 
 *** DONE add edit: notes, rate, name, setter
-*** TODO remove routes/reset wall
+*** TODO [#C] remove routes/reset wall
