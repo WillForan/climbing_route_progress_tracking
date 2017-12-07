@@ -1,4 +1,4 @@
-#+TITLE:Climbing Wall Route Annotation SPA
+#+TITLE:Log Gym Climbs with a SPA
 #+DATE:<2017-11-19 Sun>
 #+OPTIONS: toc:nil num:nil
 #+CREATOR:
