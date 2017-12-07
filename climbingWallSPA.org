@@ -21,6 +21,31 @@
 ** limitation's of org-mode tangle
    - line number error messages mean nothing
    - quick edits are hard, collaboration is near impossible
+* Setup
+** packages
+use virutalenv to get dependencies
+#+BEGIN_SRC bash
+virtualenv lib
+. lib/bin/activate
+pip install bottle tinydb
+#+END_SRC 
+
+and enable on ~httpd.conf~
+#+BEGIN_SRC
+LoadModule wsgi_module modules/mod_wsgi.so
+WSGIDaemonProcess climb user=http group=http processes=1 threads=5 python-path=/srv/http/TCW/lib/lib/python3.6/site-packages python-home=/srv/http/TCW/lib
+WSGIScriptAlias /climb /srv/http/TCW/serve.py
+
+<Directory /srv/http/TCW>
+    WSGIProcessGroup climb
+    WSGIApplicationGroup %{GLOBAL}
+    Require all granted
+</Directory>
+
+#+END_SRC
+** wsgi
+setup wsgi in apache with virtualenv
+
 * Code
 
 ** The html for the SPA only calls javascript (which among other things, inserts the svg
@@ -510,12 +535,20 @@ http POST http://localhost:8080/add Content-type:application/json <<<"$data"
  #+BEGIN_SRC python :session web :exports code :tangle serve.py :tangle-mode (identity #o755)
    #!/usr/bin/env python3
    # (elpy-use-ipython)
-   from bottle import route, run, post, static_file, request, response
+   from bottle import route, run, post, static_file, request, response, default_app
    from tinydb import TinyDB, Query
    import datetime
    import json
+   import sys
+   import os
+
+   # need to be scriptdir for importing python code
+   # and for serving static
+   scriptdir = os.path.dirname(__file__)
+   sys.path.append(scriptdir) # for wsgi
    from climb_summary import climb_summary
 
+   os.chdir(scritdir)
    db = TinyDB('./climbing_status.json')
 
 
@@ -566,7 +599,14 @@ http POST http://localhost:8080/add Content-type:application/json <<<"$data"
        return(static_file(filename, root="./"))
 
 
-   run(host='0.0.0.0',port=8080)
+   # ./serve.py test # to test
+   # ./serve.py      # returns application for wsgi (apache server)
+   if len(sys.argv) > 0 and sys.argv == 'test':
+       run(host='0.0.0.0',port=8080)
+   else:
+       # https://bottlepy.org/docs/dev/deployment.html
+       # https://stackoverflow.com/questions/18424852/configure-django-on-sub-directory
+       application = default_app()
 
 
  #+END_SRC
