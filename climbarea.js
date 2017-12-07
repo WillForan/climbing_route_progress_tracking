@@ -136,7 +136,7 @@ var vueControler = new Vue({
     
     // research all logs of this 
     listURL = ['list', this.current.location, this.current.area,this.current.color, this.current_grade].join('/')
-    ajax_update('/' + listURL, this.fetchAllstatuses)
+    ajax_update(listURL, this.fetchAllstatuses)
     console.log('updated allroutes', this.allroutes)
    },
    addCurrent: function(){
@@ -157,7 +157,7 @@ var vueControler = new Vue({
    updateList: function() {
      console.log('update summary')
      // all routes
-     ajax_update('/summary/'+this.current.location, this.fetchClimbSummaries)
+     ajax_update('summary/'+this.current.location, this.fetchClimbSummaries)
 
      // all statuses
      // ajax_update('/list/'+this.current.location, this.fetchAllstatuses)

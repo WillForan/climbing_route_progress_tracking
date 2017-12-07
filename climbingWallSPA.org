@@ -404,7 +404,7 @@ var vueControler = new Vue({
     
     // research all logs of this 
     listURL = ['list', this.current.location, this.current.area,this.current.color, this.current_grade].join('/')
-    ajax_update('/' + listURL, this.fetchAllstatuses)
+    ajax_update(listURL, this.fetchAllstatuses)
     console.log('updated allroutes', this.allroutes)
    },
    addCurrent: function(){
@@ -425,7 +425,7 @@ var vueControler = new Vue({
    updateList: function() {
      console.log('update summary')
      // all routes
-     ajax_update('/summary/'+this.current.location, this.fetchClimbSummaries)
+     ajax_update('summary/'+this.current.location, this.fetchClimbSummaries)
 
      // all statuses
      // ajax_update('/list/'+this.current.location, this.fetchAllstatuses)
@@ -782,6 +782,7 @@ http POST http://localhost:8080/add Content-type:application/json <<<"$data"
  - <2017-12-01 Fri> - style, "" instead of null for selection, db summery routes
  - <2017-12-02 Sat> - simpler interface, "user"
  - <2017-12-05 Tue> - add green to colors, textbox for set_date
+ - <2017-12-06 Wed> - serve on apache
 
 *** DONE [#A] integrate summary with display
     :LOGBOOK:
