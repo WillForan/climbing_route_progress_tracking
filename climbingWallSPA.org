@@ -549,7 +549,7 @@ http POST http://localhost:8080/add Content-type:application/json <<<"$data"
    sys.path.append(scriptdir) # for wsgi
    from climb_summary import climb_summary
 
-   os.chdir(scritdir)
+   os.chdir(scriptdir)
    db = TinyDB('./climbing_status.json')
 
 
@@ -602,7 +602,7 @@ http POST http://localhost:8080/add Content-type:application/json <<<"$data"
 
    # ./serve.py test # to test
    # ./serve.py      # returns application for wsgi (apache server)
-   if len(sys.argv) > 0 and sys.argv == 'test':
+   if len(sys.argv) > 1:
        run(host='0.0.0.0',port=8080)
    else:
        # https://bottlepy.org/docs/dev/deployment.html

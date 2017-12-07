@@ -17,7 +17,7 @@ var model =
  {'current': JSON.parse(JSON.stringify(empty_route_info)),
   'options': {
     'status': ['on-sight','completed','peiced','75%','50%','25%','started','skipped'],
-    'color':  ['blue','orange','red','pink','black','yellow','white','stripped','rainbow','graphic'],
+    'color':  ['red','orange','yellow','green','blue','pink','black','white','stripped','rainbow','graphic'],
     'grade':  ['B',0,1,2,3,4,5,6,7,8],
     'ratings': [1,2,3,4,5]
   },
