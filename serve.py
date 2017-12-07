@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 # (elpy-use-ipython)
-from bottle import route, run, post, static_file, request, response
+from bottle import route, run, post, static_file, request, response, default_app
 from tinydb import TinyDB, Query
 import datetime
 import json
+import sys
+import os
+
+# need path to this file for other python files
+# and static files
+scriptdir = os.path.dirname(__file__)
+os.chdir(scriptdir)
+sys.path.append(scriptdir)
 from climb_summary import climb_summary
 
 db = TinyDB('./climbing_status.json')
@@ -55,5 +63,11 @@ def list(location,area,color,grade,sortby="cnt"):
 def static_f(filename='index.html'):
     return(static_file(filename, root="./"))
 
+# 'test' or mod_swgi
+if len(sys.argv) > 0 and sys.argv == 'test':
+    run(host='0.0.0.0',port=8080)
+else:
+    # https://bottlepy.org/docs/dev/deployment.html
+    # https://stackoverflow.com/questions/18424852/configure-django-on-sub-directory
+    application = default_app()
 
-run(host='0.0.0.0',port=8080)
