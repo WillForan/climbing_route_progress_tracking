@@ -22,29 +22,37 @@
    - line number error messages mean nothing
    - quick edits are hard, collaboration is near impossible
 * Setup
-** packages
-use virutalenv to get dependencies
+** quick testing
 #+BEGIN_SRC bash
-virtualenv lib
-. lib/bin/activate
 pip install bottle tinydb
-#+END_SRC 
-
-and enable on ~httpd.conf~
-#+BEGIN_SRC
-LoadModule wsgi_module modules/mod_wsgi.so
-WSGIDaemonProcess climb user=http group=http processes=1 threads=5 python-path=/srv/http/TCW/lib/lib/python3.6/site-packages python-home=/srv/http/TCW/lib
-WSGIScriptAlias /climb /srv/http/TCW/serve.py
-
-<Directory /srv/http/TCW>
-    WSGIProcessGroup climb
-    WSGIApplicationGroup %{GLOBAL}
-    Require all granted
-</Directory>
-
+./serve.py test
 #+END_SRC
-** wsgi
-setup wsgi in apache with virtualenv
+** apache
+*** packages
+ use virutalenv to get dependencies
+ #+BEGIN_SRC bash
+ virtualenv lib
+ . lib/bin/activate
+ pip install bottle tinydb
+ #+END_SRC 
+
+ and enable on ~httpd.conf~
+ #+BEGIN_SRC
+ LoadModule wsgi_module modules/mod_wsgi.so
+ WSGIDaemonProcess climb user=http group=http processes=1 threads=5 python-path=/srv/http/TCW/lib/lib/python3.6/site-packages python-home=/srv/http/TCW/lib
+ WSGIScriptAlias /climb /srv/http/TCW/serve.py
+ # /climb/ pulls js,css correctly; /climb does not
+ RedirectMatch /climb$ /climb/
+
+ <Directory /srv/http/TCW>
+     WSGIProcessGroup climb
+     WSGIApplicationGroup %{GLOBAL}
+     Require all granted
+ </Directory>
+
+ #+END_SRC
+*** wsgi
+ setup wsgi in apache with virtualenv
 
 * Code
 
